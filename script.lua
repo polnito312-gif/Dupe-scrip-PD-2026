@@ -6,6 +6,9 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+
+-- ============================================================
+-- ONLINE KEY SYSTEM (Firebase)
 -- ============================================================
 local FIREBASE_URL = "https://key-sistem-a774a-default-rtdb.firebaseio.com/keys.json"
 
@@ -58,11 +61,11 @@ local State = {
 
 local FALLBACK_ITEMS = {
     "Rubles", "Gold50g", "GoldWatch", "GoldenTicket",
-    "M4", "AKM", "AKMN", "SVD", "Mosin", "SKS", "PPSH41",
-    "MK23", "MP443", "TT33", "IZh12",
-    "PSO1", "HoloSight", "ACOG", "T1Sight", "PBS1",
-    "Bandage", "WoundDressing", "RepairKit", "FlareGun",
-    "6B23", "6B5", "ZSh", "Altyn", "Smersh", "Tortilla", "Kulon"
+    "M4", "M4A1", "AKM", "AKMN", "AK74", "AK74N", "SVD", "Mosin", "SKS", "PPSH41", "ASVal", "VAL", "VSS",
+    "MK23", "MP443", "TT33", "Makarov", "IZh12", "MP5", "PP19", "Saiga",
+    "PSO1", "HoloSight", "ACOG", "T1Sight", "PBS1", "Suppressor", "Grip", "Laser",
+    "Altyn", "AltynVisor", "ZSh", "ZSh12", "6B47", "FastMT", "SSH68", "TankerHelmet", "Maska",
+    "6B23", "6B5", "6B13", "6B45", "Smersh", "JPC", "Kulon", "KoraKulon", "IOTV"
 }
 
 local MAX_SLOTS = 300
@@ -244,9 +247,9 @@ local function create_ui()
     gui.Parent = core
 
     local Main = Instance.new("Frame")
-    Main.Size = UDim2.new(0, 280, 0, 320)
-    Main.Position = UDim2.new(0.03, 0, 0.18, 0)
-    Main.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
+    Main.Size = UDim2.new(0, 300, 0, 340)
+    Main.Position = UDim2.new(0.03, 0, 0.15, 0)
+    Main.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
     Main.BorderSizePixel = 0
     Main.Active = true
     Main.Parent = gui
@@ -280,10 +283,10 @@ local function create_ui()
     Title.Size = UDim2.new(1, -40, 1, 0)
     Title.Position = UDim2.new(0, 12, 0, 0)
     Title.BackgroundTransparency = 1
-    Title.Text = "∞  Item Filler"
+    Title.Text = "∞  PD Item Filler"
     Title.TextColor3 = Color3.fromRGB(255, 190, 0)
     Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 14
+    Title.TextSize = 15
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.Parent = TitleBar
 
@@ -391,10 +394,10 @@ local function create_ui()
     end)
 
     local FillBtn = Instance.new("TextButton")
-    FillBtn.Size = UDim2.new(1, -20, 0, 40)
-    FillBtn.Position = UDim2.new(0, 10, 0, 200)
-    FillBtn.BackgroundColor3 = Color3.fromRGB(180, 130, 20)
-    FillBtn.Text = "Fill EmptySlots"
+    FillBtn.Size = UDim2.new(1, -20, 0, 42)
+    FillBtn.Position = UDim2.new(0, 10, 0, 210)
+    FillBtn.BackgroundColor3 = Color3.fromRGB(200, 145, 25)
+    FillBtn.Text = "Fill Empty Slots"
     FillBtn.TextColor3 = Color3.fromRGB(20, 20, 20)
     FillBtn.Font = Enum.Font.GothamBold
     FillBtn.TextSize = 14
@@ -414,10 +417,10 @@ local function create_ui()
     end)
 
     local Note = Instance.new("TextLabel")
-    Note.Size = UDim2.new(1, -20, 0, 16)
-    Note.Position = UDim2.new(0, 10, 0, 250)
+    Note.Size = UDim2.new(1, -20, 0, 18)
+    Note.Position = UDim2.new(0, 10, 0, 262)
     Note.BackgroundTransparency = 1
-    Note.Text = "Open vicinity / loot panel to see changes"
+    Note.Text = "Open vicinity / loot to see changes"
     Note.TextColor3 = Color3.fromRGB(120, 120, 135)
     Note.Font = Enum.Font.Gotham
     Note.TextSize = 11
