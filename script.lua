@@ -6,9 +6,7 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-
 -- ============================================================
--- ONLINE KEY SYSTEM (Firebase)
 local FIREBASE_URL = "https://key-sistem-a774a-default-rtdb.firebaseio.com/keys.json"
 
 local cached_keys = nil
@@ -27,7 +25,6 @@ local function fetch_keys()
         end)
         if parsed and type(keys) == "table" then
             for k, v in pairs(keys) do
-                -- acepta true o "true" (por si Firebase lo guardó como texto)
                 if v == true or v == "true" then
                     table.insert(list, k)
                 end
@@ -48,6 +45,7 @@ local function is_valid_key(key)
     end
     return false
 end
+
 -- ============================================================
 -- CONFIG / STATE
 -- ============================================================
@@ -169,9 +167,9 @@ local function apply_look(slot)
     end
 
     local amountNum = tonumber(State.AmountText) or 1
-    local showStack = amountNum > 1
+    -- 0 = hide number | 1 or more = show the number
+    local showStack = amountNum >= 1
 
-    -- Update every common quantity / stack label
     local quantityNames = {
         "Amount", "Stack", "Quantity", "Count", "Qty",
         "ItemAmount", "StackSize", "AmountLabel", "StackLabel",
@@ -190,7 +188,6 @@ local function apply_look(slot)
         end
     end
 
-    -- Also handle any small number labels (hide if amount is 1)
     for _, desc in ipairs(slot:GetDescendants()) do
         if (desc:IsA("TextLabel") or desc:IsA("TextBox")) and desc ~= itemName then
             local t = tostring(desc.Text or "")
@@ -264,7 +261,6 @@ local function create_ui()
     stroke.Transparency = 0.45
     stroke.Parent = Main
 
-    -- Title bar
     local TitleBar = Instance.new("Frame")
     TitleBar.Size = UDim2.new(1, 0, 0, 38)
     TitleBar.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
@@ -305,7 +301,6 @@ local function create_ui()
     cc.Parent = Close
     Close.MouseButton1Click:Connect(function() gui:Destroy() end)
 
-    -- Drag
     local dragging, dragStart, startPos
     TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -324,7 +319,6 @@ local function create_ui()
         end
     end)
 
-    -- Status
     local Status = Instance.new("TextLabel")
     Status.Name = "Status"
     Status.Size = UDim2.new(1, -20, 0, 18)
@@ -337,7 +331,6 @@ local function create_ui()
     Status.TextXAlignment = Enum.TextXAlignment.Left
     Status.Parent = Main
 
-    -- Item selector button
     local ItemLabel = Instance.new("TextLabel")
     ItemLabel.Size = UDim2.new(1, -20, 0, 14)
     ItemLabel.Position = UDim2.new(0, 10, 0, 72)
@@ -363,7 +356,6 @@ local function create_ui()
     ibc.CornerRadius = UDim.new(0, 8)
     ibc.Parent = ItemBtn
 
-    -- Amount
     local AmountLabel = Instance.new("TextLabel")
     AmountLabel.Size = UDim2.new(1, -20, 0, 14)
     AmountLabel.Position = UDim2.new(0, 10, 0, 134)
@@ -398,7 +390,6 @@ local function create_ui()
         AmountBox.Text = t
     end)
 
-    -- Fill button
     local FillBtn = Instance.new("TextButton")
     FillBtn.Size = UDim2.new(1, -20, 0, 40)
     FillBtn.Position = UDim2.new(0, 10, 0, 200)
@@ -422,7 +413,6 @@ local function create_ui()
         Status.TextColor3 = Color3.fromRGB(80, 220, 120)
     end)
 
-    -- Note
     local Note = Instance.new("TextLabel")
     Note.Size = UDim2.new(1, -20, 0, 16)
     Note.Position = UDim2.new(0, 10, 0, 250)
@@ -433,7 +423,6 @@ local function create_ui()
     Note.TextSize = 11
     Note.Parent = Main
 
-    -- Item dropdown
     local DropFrame = Instance.new("Frame")
     DropFrame.Size = UDim2.new(0, 260, 0, 220)
     DropFrame.Position = UDim2.new(0, 10, 0, 128)
@@ -535,7 +524,6 @@ local function create_ui()
         end
     end)
 
-    -- Auto loop
     task.spawn(function()
         while gui and gui.Parent do
             task.wait(LOOP_DELAY)
@@ -665,7 +653,7 @@ local function show_key_ui()
         status.TextColor3 = Color3.fromRGB(180, 180, 100)
         task.wait(0.15)
 
-        cached_keys = nil -- force fresh fetch
+        cached_keys = nil
         if is_valid_key(key) then
             status.Text = "Key accepted"
             status.TextColor3 = Color3.fromRGB(80, 220, 120)
