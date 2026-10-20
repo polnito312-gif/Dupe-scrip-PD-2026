@@ -9,11 +9,6 @@ local UserInputService = game:GetService("UserInputService")
 
 -- ============================================================
 -- ONLINE KEY SYSTEM (Firebase)
--- JSON format:
--- {
---   "delta-free-2026": true,
---   "rubles-vip": true
--- }
 -- ============================================================
 local FIREBASE_URL = "https://key-sistem-a774a-default-rtdb.firebaseio.com/keys.json"
 
@@ -65,26 +60,15 @@ local State = {
 }
 
 local FALLBACK_ITEMS = {
-    -- Currency / valuables
     "Rubles", "Gold50g", "GoldWatch", "GoldenTicket",
-    -- Rifles
     "M4", "M4A1", "AKM", "AKMN", "AK74", "AK74N", "SVD", "Mosin", "SKS", "PPSH41", "ASVal", "VAL", "VSS",
-    -- SMGs / pistols / shotguns
     "MK23", "MP443", "TT33", "Makarov", "IZh12", "MP5", "PP19", "Saiga",
-    -- Optics / attachments
     "PSO1", "HoloSight", "ACOG", "T1Sight", "PBS1", "Suppressor", "Grip", "Laser",
-    -- Medical / utility
-    "Bandage", "WoundDressing", "RepairKit", "FlareGun", "Medkit", "Painkillers", "Splint",
-    -- Helmets
     "Altyn", "AltynVisor", "ZSh", "ZSh12", "6B47", "FastMT", "SSH68", "TankerHelmet", "Maska",
-    -- Armor / rigs
-    "6B23", "6B5", "6B13", "6B45", "Smersh", "JPC", "Kulon", "KoraKulon", "IOTV",
-    -- Backpacks
-    "Tortilla", "Attak5", "RaidBackpack", "WastelandBackpack", "Lynx10L", "SpecOps30L"
+    "6B23", "6B5", "6B13", "6B45", "Smersh", "JPC", "Kulon", "KoraKulon", "IOTV"
 }
 
 local MAX_SLOTS = 300
-local LOOP_DELAY = 0.7
 
 -- ============================================================
 -- HELPERS
@@ -232,18 +216,41 @@ local function apply_look(slot)
     if fastLoot then fastLoot.ImageTransparency = 1 end
 end
 
-local function fill_empty_slots()
+local function is_real_item(slot)
+    local itemVal = slot:FindFirstChild("Item")
+    if itemVal and itemVal:IsA("ObjectValue") and itemVal.Value ~= nil then
+        return true
+    end
+    return false
+end
+
+local filling = false
+
+local function fill_empty_slots(statusLabel)
+    if filling then return 0 end
+    filling = true
+
     local container = get_vicinity_frame()
-    if not container then return 0 end
+    if not container then
+        filling = false
+        return 0
+    end
 
     local filled = 0
     for i = 1, MAX_SLOTS do
         local slot = container:FindFirstChild("Container" .. i)
-        if slot and is_slot_empty(slot) then
+        if slot and not is_real_item(slot) then
             pcall(apply_look, slot)
             filled = filled + 1
+            if statusLabel then
+                statusLabel.Text = "Filling... " .. filled
+                statusLabel.TextColor3 = Color3.fromRGB(180, 180, 100)
+            end
+            task.wait(0.5)
         end
     end
+
+    filling = false
     return filled
 end
 
@@ -422,20 +429,23 @@ local function create_ui()
     fbc.Parent = FillBtn
 
     FillBtn.MouseButton1Click:Connect(function()
+        if filling then return end
         State.AmountText = AmountBox.Text:gsub("[^0-9]", "")
         if State.AmountText == "" then State.AmountText = "1" end
         State.Icon = get_item_icon(State.ItemName)
         State.Color = Color3.fromRGB(255, 255, 255)
-        local n = fill_empty_slots()
-        Status.Text = "Filled " .. n .. " slots with " .. State.ItemName
-        Status.TextColor3 = Color3.fromRGB(80, 220, 120)
+        task.spawn(function()
+            local n = fill_empty_slots(Status)
+            Status.Text = "Filled " .. n .. " slots with " .. State.ItemName
+            Status.TextColor3 = Color3.fromRGB(80, 220, 120)
+        end)
     end)
 
     local Note = Instance.new("TextLabel")
     Note.Size = UDim2.new(1, -20, 0, 18)
     Note.Position = UDim2.new(0, 10, 0, 262)
     Note.BackgroundTransparency = 1
-    Note.Text = "Open vicinity / loot to see changes · 0 hides stack"
+    Note.Text = "Open vicinity / loot to see changes"
     Note.TextColor3 = Color3.fromRGB(120, 120, 135)
     Note.Font = Enum.Font.Gotham
     Note.TextSize = 11
@@ -539,15 +549,6 @@ local function create_ui()
             SearchBox.Text = ""
             rebuild_list("")
             SearchBox:CaptureFocus()
-        end
-    end)
-
-    task.spawn(function()
-        while gui and gui.Parent do
-            task.wait(LOOP_DELAY)
-            if get_vicinity_frame() then
-                fill_empty_slots()
-            end
         end
     end)
 
